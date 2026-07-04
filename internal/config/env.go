@@ -1,0 +1,24 @@
+package config
+
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	DatabaseURL string
+	Port        string
+	JwtSecret   string
+}
+
+func LoadEnv() *Config {
+	if err := godotenv.Load(); err != nil {
+		return nil
+	}
+	return &Config{
+		DatabaseURL: os.Getenv("DB_URL"),
+		Port:        os.Getenv("PORT"),
+		JwtSecret:   os.Getenv("JWT_SECRET"),
+	}
+}
