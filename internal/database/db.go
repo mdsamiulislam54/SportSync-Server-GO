@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"sportsync/internal/config"
 
 	"gorm.io/driver/postgres"
@@ -12,5 +13,6 @@ func ConnectDB(env *config.Config) *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
+	fmt.Println("Database connection successful")
 	return db
 }

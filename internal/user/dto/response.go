@@ -1,1 +1,37 @@
 package dto
+
+import (
+	"time"
+)
+
+type UserResponse struct {
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type RegisterUserResponse struct {
+	Success bool         `json:"success"`
+	Message string       `json:"message"`
+	Data    UserResponse `json:"data"`
+}
+
+type LoginData struct {
+	Token string           `json:"token"`
+	User  UserLoginDetails `json:"user"`
+}
+
+type UserLoginDetails struct {
+	ID    uint   `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+type LoginResponse struct {
+	Success bool      `json:"success"`
+	Message string    `json:"message"`
+	Data    LoginData `json:"data"`
+}

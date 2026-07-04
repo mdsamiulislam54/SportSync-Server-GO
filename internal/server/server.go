@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sportsync/internal/config"
+	"sportsync/internal/user"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
@@ -24,17 +25,17 @@ func (cv *CustomValidator) Validate(i any) error {
 func StartServer(db *gorm.DB, cfg *config.Config) {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: *validator.New()}
-	// err := db.AutoMigrate(user.UserDTO{})
-	// if err != nil {
-	// 	panic(`"failed to migrate database", "error", ${err}`)
-	// }
+	err := db.AutoMigrate(user.User{})
+	if err != nil {
+		panic(`"failed to migrate database", "error",`)
+	}
 	fmt.Println("Connected to the database successfully!")
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, "Hello World ")
 	})
 
-	// user.RegisterRoute(e, db)
+	user.RegisterRoute(e, db, cfg)
 
 	if err := e.Start(":" + cfg.Port); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
