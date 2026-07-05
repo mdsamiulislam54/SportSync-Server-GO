@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"sportsync/internal/config"
+	"sportsync/internal/parkingzones"
+	"sportsync/internal/reservations"
 	"sportsync/internal/user"
 
 	"github.com/go-playground/validator/v10"
@@ -25,7 +27,7 @@ func (cv *CustomValidator) Validate(i any) error {
 func StartServer(db *gorm.DB, cfg *config.Config) {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: *validator.New()}
-	err := db.AutoMigrate(user.User{})
+	err := db.AutoMigrate(user.User{}, parkingzones.Zone{}, reservations.Reservation{})
 	if err != nil {
 		panic(`"failed to migrate database", "error",`)
 	}
@@ -36,6 +38,8 @@ func StartServer(db *gorm.DB, cfg *config.Config) {
 	})
 
 	user.RegisterRoute(e, db, cfg)
+	parkingzones.ZoneRoute(e, db, cfg)
+	reservations.ReservationRoute(e, db, cfg)
 
 	if err := e.Start(":" + cfg.Port); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

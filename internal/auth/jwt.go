@@ -21,8 +21,8 @@ type JWTClaims struct {
 }
 
 type JwtService interface {
-	GenerateJwtToken(userId uint, email string, name string,role string) (string, error)
-	TokenValidation(tokenStr string) (*JWTClaims, error) 
+	GenerateJwtToken(userId uint, email string, name string, role string) (string, error)
+	TokenValidation(tokenStr string) (*JWTClaims, error)
 }
 
 type jwtService struct {
@@ -31,6 +31,13 @@ type jwtService struct {
 }
 
 func NewJwtService(secretKey string, duration time.Duration) JwtService {
+	if secretKey == "" {
+		secretKey = jwtSecretKey
+	}
+
+	if duration == 0 {
+		duration = defaultTokenDuration
+	}
 	return &jwtService{
 		secretKey, duration,
 	}
@@ -41,7 +48,7 @@ func (js *jwtService) GenerateJwtToken(userId uint, email string, name string, r
 		UserID: userId,
 		Email:  email,
 		Name:   name,
-		Role: role,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(js.tokenDuration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -59,6 +66,7 @@ func (js *jwtService) GenerateJwtToken(userId uint, email string, name string, r
 }
 
 func (js *jwtService) TokenValidation(tokenStr string) (*JWTClaims, error) {
+	fmt.Println("parse token///...,,,,,,,,,,,,,,,,", tokenStr)
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&JWTClaims{},
@@ -73,7 +81,7 @@ func (js *jwtService) TokenValidation(tokenStr string) (*JWTClaims, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unexpected signing method: %w", err)
 	}
-
+	fmt.Println(" token///...,,,,,,,,,,,,,,,,", token)
 	claims, ok := token.Claims.(*JWTClaims)
 	if !ok || !token.Valid {
 		return nil, jwt.ErrTokenInvalidClaims
