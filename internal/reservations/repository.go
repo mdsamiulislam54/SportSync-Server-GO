@@ -10,7 +10,11 @@ import (
 )
 
 type Repository interface {
+	GetAllReservation() ([]Reservation, error)
 	ReservationCreate(Reservation *Reservation) error
+	MyReservations(userId uint) ([]Reservation, error)
+	GetReservationById(id uint) (*Reservation, error)
+	ReservationsCancel(id uint) error
 }
 
 type repository struct {
@@ -54,10 +58,14 @@ func (r repository) ReservationCreate(reservation *Reservation) error {
 		return nil
 	})
 }
-func (r repository) myReservations(userId uint) ([]Reservation, error) {
+func (r repository) MyReservations(userId uint) ([]Reservation, error) {
 	var reservation []Reservation
-	err := r.db.Find(&reservation, userId).Error
-
+	err := r.db.
+		Where("user_id = ?", userId).
+		Preload("Zone", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name", "type")
+		}).
+		Find(&reservation).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("Reservation not found")
@@ -68,7 +76,25 @@ func (r repository) myReservations(userId uint) ([]Reservation, error) {
 
 	return reservation, nil
 }
-func (r repository) reservationsCancel(id uint) (*Reservation, error) {
+func (r repository) ReservationsCancel(id uint) error {
+	var reservation Reservation
+
+	if err := r.db.First(&reservation, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("reservation not found")
+		}
+		return err
+	}
+
+	reservation.Status = "cancelled"
+	if err := r.db.Save(&reservation).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r repository) GetReservationById(id uint) (*Reservation, error) {
 	var reservation Reservation
 
 	if err := r.db.First(&reservation, id).Error; err != nil {
@@ -78,10 +104,21 @@ func (r repository) reservationsCancel(id uint) (*Reservation, error) {
 		return nil, err
 	}
 
-	reservation.Status = "cancelled"
-	if err := r.db.Save(&reservation).Error; err != nil {
-		return nil, err
+	return &reservation, nil
+}
+
+func (r repository) GetAllReservation() ([]Reservation, error) {
+	var reservation []Reservation
+
+	err := r.db.
+		Preload("Zone").
+		Preload("User").
+		Find(&reservation).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("Reservation not found")
+		}
 	}
 
-	return &reservation, nil
+	return reservation, nil
 }

@@ -26,16 +26,8 @@ func Authorized(roles ...string) echo.MiddlewareFunc {
 				return echo.NewHTTPError(http.StatusForbidden, "Forbidden")
 			}
 
-			for _, r := range roles {
-				if role == r {
-					return next(c)
-				}
-			}
-
-			return c.JSON(http.StatusForbidden, map[string]string{
-				"error": " forbidden Access ",
-			})
-
+			return next(c)
+			
 		}
 	}
 }

@@ -24,7 +24,21 @@ type UpdateReservationResponse struct {
 }
 
 type GetAllReservationResponse struct {
-	Success bool                  `json:"success"`
-	Message string                `json:"message"`
-	Data    []ReservationResponse `json:"data"`
+	Success bool                    `json:"success"`
+	Message string                  `json:"message"`
+	Data    []MyReservationResponse `json:"data"`
+}
+
+type MyReservationResponse struct {
+	ID           uint                      `json:"id"`
+	LicensePlate string                    `json:"license_plate"`
+	Status       string                    `json:"status"`
+	Zone         MyReservationResponseZone `json:"zone"`
+	CreatedAt    time.Time                 `json:"created_at"`
+}
+
+type MyReservationResponseZone struct {
+	ID   uint      `json:"id"`
+	Name string    `json:"name"`
+	Type string `json:"type"`
 }

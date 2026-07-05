@@ -6,9 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
+type ZoneWithAvailable struct {
+	Zone
+	AvailableSpots int `gorm:"column:available_spots"`
+}
 type Repository interface {
 	CreateZone(zone *Zone) error
-	GetAllZones() ([]Zone, error)
+	GetAllZones() ([]ZoneWithAvailable, error)
 	GetZoneById(id uint) (*Zone, error)
 }
 
@@ -25,13 +29,25 @@ func NewZoneRepository(db *gorm.DB) Repository {
 func (r *repository) CreateZone(zone *Zone) error {
 	return r.db.Create(&zone).Error
 }
-func (r *repository) GetAllZones() ([]Zone, error) {
-	var zone []Zone
-	result := r.db.Find(&zone)
-	if result.Error != nil {
-		return nil, result.Error
+func (r *repository) GetAllZones() ([]ZoneWithAvailable, error) {
+	var zones []ZoneWithAvailable
+	err := r.db.Model(&Zone{}).
+		Select(`
+		zones.*,
+		(total_capacity - (
+		SELECT COUNT(*)
+		FROM reservations
+		WHERE reservations.zone_id = zones.id
+		AND reservations.status ='active'
+		)) As available_spots
+	
+	`).Find(&zones).Error
+
+	if err != nil {
+		return nil, err
 	}
-	return zone, nil
+
+	return zones, nil
 }
 
 func (r *repository) GetZoneById(id uint) (*Zone, error) {

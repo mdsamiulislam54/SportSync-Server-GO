@@ -46,7 +46,7 @@ func (h handler) CreateUser(c *echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, res)
+	return c.JSON(http.StatusOK, res)
 
 }
 

@@ -25,6 +25,7 @@ func (s *service) CreateUser(req dto.CreateUserRequest) (*dto.RegisterUserRespon
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
+		Role:     req.Role,
 	}
 
 	user.HashPassword()
@@ -58,7 +59,6 @@ func (s *service) LoginUser(req dto.LoginRequest) (*dto.LoginResponse, error) {
 	if err := user.checkPassword(req.Password); err != nil {
 		return nil, userCredentialError
 	}
-
 
 	token, err := s.jwtService.GenerateJwtToken(user.ID, user.Email, user.Name, user.Role)
 	if err != nil {

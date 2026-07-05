@@ -1,11 +1,9 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 	"sportsync/internal/auth"
 	"strings"
-
 	"github.com/labstack/echo/v5"
 )
 
@@ -20,7 +18,7 @@ func AuthValidation(jwtService auth.JwtService) echo.MiddlewareFunc {
 			}
 
 			parts := strings.Split(authHeader, " ")
-			fmt.Println(parts,".............................")
+	
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				return c.JSON(http.StatusUnauthorized, map[string]string{
 					"error": "Missing authorization bearer token",

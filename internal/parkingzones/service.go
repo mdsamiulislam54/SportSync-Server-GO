@@ -58,6 +58,7 @@ func (s *service) GetAllZones() (*dto.GetAllZoneResponse, error) {
 			Name:          zone.Name,
 			Type:          zone.Type,
 			TotalCapacity: zone.TotalCapacity,
+			AvailableSport: zone.AvailableSpots,
 			PricePerHour:  zone.PricePerHour,
 			CreatedAt:     zone.CreatedAt,
 			UpdatedAt:     zone.UpdatedAt,
