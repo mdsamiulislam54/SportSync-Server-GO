@@ -120,7 +120,7 @@ func (h handler) GetAllReservation(c *echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusInternalServerError, map[string]any{
+	return c.JSON(http.StatusOK, map[string]any{
 		"data":    response,
 		"success": true,
 		"message": "Reservation Retrieved successfully",

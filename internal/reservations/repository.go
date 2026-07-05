@@ -61,7 +61,7 @@ func (r repository) ReservationCreate(reservation *Reservation) error {
 func (r repository) MyReservations(userId uint) ([]Reservation, error) {
 	var reservation []Reservation
 	err := r.db.
-		Where("user_id = ?", userId).
+		Where("user_id = ? AND status=?", userId, "active").
 		Preload("Zone", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "name", "type")
 		}).
@@ -97,7 +97,9 @@ func (r repository) ReservationsCancel(id uint) error {
 func (r repository) GetReservationById(id uint) (*Reservation, error) {
 	var reservation Reservation
 
-	if err := r.db.First(&reservation, id).Error; err != nil {
+	if err := r.db.
+		Where("status=?", "active").
+		First(&reservation, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("reservation not found")
 		}
@@ -111,6 +113,7 @@ func (r repository) GetAllReservation() ([]Reservation, error) {
 	var reservation []Reservation
 
 	err := r.db.
+		Where("status=?", "active").
 		Preload("Zone").
 		Preload("User").
 		Find(&reservation).Error
