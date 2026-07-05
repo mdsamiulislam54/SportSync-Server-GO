@@ -13,12 +13,24 @@ type Config struct {
 }
 
 func LoadEnv() *Config {
-	if err := godotenv.Load(); err != nil {
-		return nil
-	}
-	return &Config{
+	_ = godotenv.Load()
+	cfg := &Config{
 		DatabaseURL: os.Getenv("DB_URL"),
 		Port:        os.Getenv("PORT"),
 		JwtSecret:   os.Getenv("JWT_SECRET"),
 	}
+
+	if cfg.DatabaseURL == "" {
+		panic("DB_URL is missing")
+	}
+
+	if cfg.JwtSecret == "" {
+		panic("JWT_SECRET is missing")
+	}
+
+	if cfg.Port == "" {
+		cfg.Port = "5000"
+	}
+
+	return cfg
 }
